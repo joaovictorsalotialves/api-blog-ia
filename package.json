@@ -1,0 +1,9 @@
+{
+  "name": "blog-ia",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node --watch src/index.js"
+  },
+  "license": "ISC",
+  "type": "module"
+}
