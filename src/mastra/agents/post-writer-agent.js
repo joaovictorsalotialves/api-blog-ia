@@ -1,4 +1,3 @@
-
 import { Agent } from '@mastra/core/agent'
 
 export const ID = 'post-writer-agent'

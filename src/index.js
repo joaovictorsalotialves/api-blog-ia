@@ -12,17 +12,17 @@ const server = http.createServer(async (req, res) => {
 
   if (path === '/posts' && method === 'GET') {
     const posts = await findAllPosts()
-      
-		res.writeHead(200, { 'Content-Type': 'application/json' })
-		return res.end(JSON.stringify({ data: posts }))
+
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    return res.end(JSON.stringify({ data: posts }))
   }
 
   if (path === '/posts/draft' && method === 'POST') {
     const bodyBuffer = []
     let body = null
-    
+
     // Armazena o corpo da requisição em um array
-    req.on('data', chunk => bodyBuffer.push(chunk))
+    req.on('data', (chunk) => bodyBuffer.push(chunk))
     req.on('end', async () => {
       try {
         const bodyString = Buffer.concat(bodyBuffer).toString()
@@ -34,9 +34,10 @@ const server = http.createServer(async (req, res) => {
         return res.end(JSON.stringify({ data: post }))
       } catch (error) {
         if (error instanceof ZodError || error instanceof SyntaxError) {
-          const message = error instanceof ZodError
-            ? error.issues[0]?.message || 'Invalid input.'
-            : 'Request body must be valid JSON.'
+          const message =
+            error instanceof ZodError
+              ? error.issues[0]?.message || 'Invalid input.'
+              : 'Request body must be valid JSON.'
           res.writeHead(400, { 'Content-Type': 'application/json' })
           return res.end(JSON.stringify({ message }))
         }
@@ -51,10 +52,10 @@ const server = http.createServer(async (req, res) => {
   }
 
   res.writeHead(404, { 'Content-Type': 'application/json' })
-  return res.end(JSON.stringify({ message: "Not Found" }))
+  return res.end(JSON.stringify({ message: 'Not Found' }))
 })
 
 server.listen(API_PORT, API_HOST, () => {
   console.log(`Server running on ${API_PROTOCOL}://${API_HOST}:${API_PORT}`)
-  console.log("Press CTRL+C to stop")
+  console.log('Press CTRL+C to stop')
 })
