@@ -1,6 +1,6 @@
 import http from 'node:http'
 import { ZodError } from 'zod'
-import { findAllPosts } from './repositories/posts-repository.js'
+import { findAllPosts, findPostById } from './repositories/posts-repository.js'
 import { createPostDraft } from './services/create-post-draft.js'
 
 const { API_PORT, API_HOST, API_PROTOCOL } = process.env
@@ -12,6 +12,14 @@ const server = http.createServer(async (req, res) => {
 
   if (path === '/posts' && method === 'GET') {
     const posts = await findAllPosts()
+
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    return res.end(JSON.stringify({ data: posts }))
+  }
+
+  const postPathMatch = path.match(/^\/posts\/([^/]+)$/)
+  if (postPathMatch && method === 'GET') {
+    const posts = await findPostById(postPathMatch[1])
 
     res.writeHead(200, { 'Content-Type': 'application/json' })
     return res.end(JSON.stringify({ data: posts }))
