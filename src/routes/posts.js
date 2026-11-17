@@ -1,0 +1,44 @@
+import { ZodError } from 'zod'
+import { findAllPosts, findPostById } from '../repositories/posts-repository.js'
+import { createPostDraft } from '../services/create-post-draft.js'
+
+export function registerPostRoutes(app) {
+  app.get('/posts', async (_req, res) => {
+    const posts = await findAllPosts()
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    return res.end(JSON.stringify({ data: posts }))
+  })
+
+  app.get('/posts/:id', async (req, res) => {
+    const post = await findPostById(req.params.id)
+
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    return res.end(JSON.stringify({ data: post }))
+  })
+
+  app.post('/posts/draft', async (req, res) => {
+    try {
+      const bodyBuffer = []
+      for await (const chunk of req) bodyBuffer.push(chunk)
+
+      const body = JSON.parse(Buffer.concat(bodyBuffer).toString())
+      const post = await createPostDraft(body?.idea)
+
+      res.writeHead(201, { 'Content-Type': 'application/json' })
+      return res.end(JSON.stringify({ data: post }))
+    } catch (error) {
+      if (error instanceof ZodError || error instanceof SyntaxError) {
+        const message =
+          error instanceof ZodError
+            ? error.issues[0]?.message || 'Invalid input.'
+            : 'Request body must be valid JSON.'
+        res.writeHead(400, { 'Content-Type': 'application/json' })
+        return res.end(JSON.stringify({ message }))
+      }
+
+      console.error('Error creating post draft:', error)
+      res.writeHead(500, { 'Content-Type': 'application/json' })
+      return res.end(JSON.stringify({ message: 'Unable to create post draft.' }))
+    }
+  })
+}
