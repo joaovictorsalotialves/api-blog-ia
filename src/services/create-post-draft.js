@@ -1,7 +1,10 @@
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
+import { insertPost } from '../repositories/posts-repository.js'
 import { mastra } from '../mastra/index.js'
 import { ID } from '../mastra/agents/post-writer-agent.js'
+
+const createPostDraftSchema = z.string().trim().min(1, 'O campo idea é obrigatório.')
 
 const postContentSchema = z.object({
   title: z.string().describe('Título do post'),
@@ -9,10 +12,11 @@ const postContentSchema = z.object({
 })
 
 export async function createPostDraft(idea) {
+  const validatedIdea = createPostDraftSchema.parse(idea)
   const agent = mastra.getAgentById(ID)
 
   const response = await agent.generate(
-    `Crie um post de blog completo baseado na seguinte ideia:\n\n${idea}`,
+    `Crie um post de blog completo baseado na seguinte ideia:\n\n${validatedIdea}`,
     {
       structuredOutput: {
         schema: postContentSchema,
@@ -22,7 +26,7 @@ export async function createPostDraft(idea) {
 
   const { title, content } = response.object
 
-  return {
+  const post = {
     id: nanoid(),
     title,
     content,
@@ -31,4 +35,6 @@ export async function createPostDraft(idea) {
     approved_at: null,
     rejected_at: null,
   }
+
+  return insertPost(post)
 }

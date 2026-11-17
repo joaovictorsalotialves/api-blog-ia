@@ -1,18 +1,20 @@
 import http from 'node:http'
+import { ZodError } from 'zod'
+import { findAllPosts } from './repositories/posts-repository.js'
 import { createPostDraft } from './services/create-post-draft.js'
 
 const { API_PORT, API_HOST, API_PROTOCOL } = process.env
 
-const posts = []
-
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const { url, method } = req
   const paths = url.split('?').filter(Boolean)
   const path = paths.at(0) || '/'
 
   if (path === '/posts' && method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' })
-    return res.end(JSON.stringify({ data: posts }))
+    const posts = await findAllPosts()
+      
+		res.writeHead(200, { 'Content-Type': 'application/json' })
+		return res.end(JSON.stringify({ data: posts }))
   }
 
   if (path === '/posts/draft' && method === 'POST') {
@@ -26,14 +28,22 @@ const server = http.createServer((req, res) => {
         const bodyString = Buffer.concat(bodyBuffer).toString()
         body = JSON.parse(bodyString)
 
-        const post = await createPostDraft(body.idea)
-        posts.push(post)
+        const post = await createPostDraft(body?.idea)
 
         res.writeHead(201, { 'Content-Type': 'application/json' })
         return res.end(JSON.stringify({ data: post }))
       } catch (error) {
+        if (error instanceof ZodError || error instanceof SyntaxError) {
+          const message = error instanceof ZodError
+            ? error.issues[0]?.message || 'Invalid input.'
+            : 'Request body must be valid JSON.'
+          res.writeHead(400, { 'Content-Type': 'application/json' })
+          return res.end(JSON.stringify({ message }))
+        }
+
+        console.error('Error creating post draft:', error)
         res.writeHead(500, { 'Content-Type': 'application/json' })
-        return res.end(JSON.stringify({ message: error.message }))
+        return res.end(JSON.stringify({ message: 'Unable to create post draft.' }))
       }
     })
 
