@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "node --env-file=.env.local --watch src/index.js",
-    "lint": "oxlint --fix src",
-    "format": "oxfmt src package.json",
-    "format:check": "oxfmt --check src package.json",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:integration": "node --env-file=.env.local --test tests/integration/*.test.js",
+    "test:e2e": "node --env-file=.env.local --test tests/e2e/*.test.js",
+    "lint": "oxlint --fix src tests",
+    "format": "oxfmt src tests package.json",
+    "format:check": "oxfmt --check src tests package.json",
     "docker:build": "docker build -t rocketseat-blog-ia:latest .",
     "env:setup": "cp .env.example .env.local",
     "local:setup": "npm run env:setup && npm run infra:up && npm run migrate:up",
@@ -30,7 +34,8 @@
     "lint-staged": "^17.6.1",
     "oxfmt": "^0.79.0",
     "oxlint": "^1.94.0",
-    "postgrator-cli": "^9.1.0"
+    "postgrator-cli": "^9.1.0",
+    "supertest": "^7.3.2"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs}": [

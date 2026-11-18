@@ -86,6 +86,19 @@ Não commite `.env.local` nem outros arquivos com segredos. Em produção, confi
 
 A API fica em `http://localhost:8080` com a configuração sugerida. O Compose atual inicia somente o PostgreSQL; a API é executada pelo Node no host.
 
+## Testes
+
+Os testes usam o runner nativo `node:test`. As suítes de integração e E2E dependem do PostgreSQL local com as migrations aplicadas; configure `.env.local`, suba a infraestrutura e rode `npm run migrate:up` antes delas. Os testes usam IDs aleatórios e removem os registros criados ao final.
+
+```powershell
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+npm test
+```
+
+`test:unit` não exige banco. `test:integration` verifica o repositório diretamente no PostgreSQL. `test:e2e` inicia a aplicação em uma porta local aleatória e usa Supertest para validar as rotas HTTP junto com o banco, sem chamar o provedor de IA.
+
 Para parar o banco:
 
 ```powershell
@@ -268,6 +281,10 @@ O arquivo `.env.production` deve conter os valores reais dos segredos, ter acess
 | Script | Finalidade |
 | --- | --- |
 | `npm run dev` | Executa a API em desenvolvimento, lendo `.env.local` e reiniciando ao detectar alterações. |
+| `npm test` | Executa os testes unitários, de integração e E2E em sequência. |
+| `npm run test:unit` | Executa testes unitários com `node:test`; não exige banco. |
+| `npm run test:integration` | Executa testes do repositório contra o PostgreSQL local. |
+| `npm run test:e2e` | Executa testes HTTP com Supertest e PostgreSQL local. |
 | `npm run infra:up` | Inicia o PostgreSQL local via Docker Compose e aguarda a prontidão. |
 | `npm run infra:down` | Para o PostgreSQL local sem remover o volume. |
 | `npm run migrate:up` | Aplica migrations usando `.env.local`. |

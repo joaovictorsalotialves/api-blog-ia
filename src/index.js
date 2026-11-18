@@ -1,10 +1,7 @@
-import { fastify } from './fastify.js'
-import { registerPostRoutes } from './routes/posts.js'
+import { createApp } from './app.js'
 
 const { API_PORT, API_HOST, API_PROTOCOL } = process.env
-const app = fastify()
-
-registerPostRoutes(app)
+const app = createApp()
 
 app.listen(API_PORT, API_HOST, () => {
   console.log(`Server running on ${API_PROTOCOL}://${API_HOST}:${API_PORT}`)
