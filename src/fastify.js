@@ -85,6 +85,9 @@ export function fastify() {
     patch(path, handler) {
       registerRoute('PATCH', path, handler)
     },
+    delete(path, handler) {
+      registerRoute('DELETE', path, handler)
+    },
     listen(port, host, callback) {
       const server = http.createServer(handleRequest)
       return server.listen(port, host, callback)

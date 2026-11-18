@@ -3,6 +3,7 @@ import {
   approvePost,
   findAllPublishedAndApprovedPosts,
   findPostById,
+  rejectPost,
 } from '../repositories/posts-repository.js'
 import { createPostDraft } from '../services/create-post-draft.js'
 
@@ -22,6 +23,18 @@ export function registerPostRoutes(app) {
 
   app.patch('/posts/:id/approve', async (req, res) => {
     const post = await approvePost(req.params.id)
+
+    if (!post) {
+      res.writeHead(404, { 'Content-Type': 'application/json' })
+      return res.end(JSON.stringify({ message: 'Post not found.' }))
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    return res.end(JSON.stringify({ data: post }))
+  })
+
+  app.delete('/posts/:id/reject', async (req, res) => {
+    const post = await rejectPost(req.params.id)
 
     if (!post) {
       res.writeHead(404, { 'Content-Type': 'application/json' })
