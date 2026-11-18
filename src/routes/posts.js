@@ -1,16 +1,32 @@
 import { ZodError } from 'zod'
-import { findAllPosts, findPostById } from '../repositories/posts-repository.js'
+import {
+  approvePost,
+  findAllPublishedAndApprovedPosts,
+  findPostById,
+} from '../repositories/posts-repository.js'
 import { createPostDraft } from '../services/create-post-draft.js'
 
 export function registerPostRoutes(app) {
   app.get('/posts', async (_req, res) => {
-    const posts = await findAllPosts()
+    const posts = await findAllPublishedAndApprovedPosts()
     res.writeHead(200, { 'Content-Type': 'application/json' })
     return res.end(JSON.stringify({ data: posts }))
   })
 
   app.get('/posts/:id', async (req, res) => {
     const post = await findPostById(req.params.id)
+
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    return res.end(JSON.stringify({ data: post }))
+  })
+
+  app.patch('/posts/:id/approve', async (req, res) => {
+    const post = await approvePost(req.params.id)
+
+    if (!post) {
+      res.writeHead(404, { 'Content-Type': 'application/json' })
+      return res.end(JSON.stringify({ message: 'Post not found.' }))
+    }
 
     res.writeHead(200, { 'Content-Type': 'application/json' })
     return res.end(JSON.stringify({ data: post }))

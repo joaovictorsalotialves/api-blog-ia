@@ -82,6 +82,9 @@ export function fastify() {
     post(path, handler) {
       registerRoute('POST', path, handler)
     },
+    patch(path, handler) {
+      registerRoute('PATCH', path, handler)
+    },
     listen(port, host, callback) {
       const server = http.createServer(handleRequest)
       return server.listen(port, host, callback)
