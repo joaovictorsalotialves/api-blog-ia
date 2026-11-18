@@ -20,9 +20,17 @@ export async function findAllPublishedAndApprovedPosts() {
   return rows.map(mapRowToPost)
 }
 
+export async function findAllPosts() {
+  const { rows } = await pool.query(
+    'SELECT id, title, content, published_at, created_at, approved_at, rejected_at FROM posts ORDER BY created_at DESC',
+  )
+
+  return rows.map(mapRowToPost)
+}
+
 export async function findPostById(id) {
   const { rows } = await pool.query(
-    'SELECT id, title, content, published_at, created_at, approved_at, rejected_at FROM posts WHERE id = $1',
+    'SELECT id, title, content, published_at, created_at, approved_at, rejected_at FROM posts WHERE id = $1 AND published_at <= NOW() AND approved_at IS NOT NULL AND rejected_at IS NULL',
     [id],
   )
 

@@ -1,6 +1,8 @@
 import { ZodError } from 'zod'
+import { validateApiKey } from '../auth/validate-api-key.js'
 import {
   approvePost,
+  findAllPosts,
   findAllPublishedAndApprovedPosts,
   findPostById,
   rejectPost,
@@ -8,14 +10,35 @@ import {
 import { createPostDraft } from '../services/create-post-draft.js'
 
 export function registerPostRoutes(app) {
-  app.get('/posts', async (_req, res) => {
-    const posts = await findAllPublishedAndApprovedPosts()
+  app.get('/posts', async (req, res) => {
+    const url = new URL(req.url, 'http://localhost')
+    const includeAll = url.searchParams.get('include') === 'all'
+
+    if (includeAll) {
+      if (!validateApiKey(req.headers.authorization)) {
+        res.writeHead(403, { 'Content-Type': 'application/json' })
+        return res.end(JSON.stringify({ message: 'Forbidden' }))
+      }
+    }
+
+    let posts
+    if (includeAll) {
+      posts = await findAllPosts()
+    } else {
+      posts = await findAllPublishedAndApprovedPosts()
+    }
+
     res.writeHead(200, { 'Content-Type': 'application/json' })
     return res.end(JSON.stringify({ data: posts }))
   })
 
   app.get('/posts/:id', async (req, res) => {
     const post = await findPostById(req.params.id)
+
+    if (!post) {
+      res.writeHead(404, { 'Content-Type': 'application/json' })
+      return res.end(JSON.stringify({ message: 'Post not found.' }))
+    }
 
     res.writeHead(200, { 'Content-Type': 'application/json' })
     return res.end(JSON.stringify({ data: post }))
