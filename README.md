@@ -128,6 +128,8 @@ Use a mesma `DATABASE_URL` local indicada acima para executar as migrations pelo
 
 Todas as respostas usam JSON. Os exemplos abaixo usam `curl.exe`, disponível no Windows moderno, e assumem que a API está em `http://localhost:8080`.
 
+A documentação interativa Swagger UI está disponível em `http://localhost:8080/ap/docs` (também em `/api/docs`). O documento OpenAPI em JSON pode ser acessado em `http://localhost:8080/api/docs/json`.
+
 ### `GET /posts`
 
 Lista posts publicados, aprovados, não rejeitados e cuja data de publicação já chegou. Não exige autenticação.
